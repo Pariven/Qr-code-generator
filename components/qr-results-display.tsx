@@ -26,11 +26,18 @@ export default function QrResultsDisplay({ qrCodes, onBack, settings }: QrResult
     try {
       const zip = new JSZip()
 
+      // Helper function to sanitize filename - remove special characters
+      const sanitizeFilename = (text: string) => {
+        return text.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').substring(0, 30)
+      }
+
       // Add QR code images directly to the root of the ZIP (no nested folder)
       qrCodes.forEach((qr, index) => {
         if (qr.qrDataUrl) {
           const base64 = qr.qrDataUrl.split(",")[1]
-          zip.file(`qr-${index + 1}-${qr.data.slice(0, 20)}.png`, base64, { base64: true })
+          const sanitizedName = sanitizeFilename(qr.data)
+          const filename = `qr-${String(index + 1).padStart(4, '0')}-${sanitizedName}.png`
+          zip.file(filename, base64, { base64: true })
         }
       })
 
@@ -39,7 +46,8 @@ export default function QrResultsDisplay({ qrCodes, onBack, settings }: QrResult
       const csvRows = qrCodes
         .map((qr, index) => {
           if (qr.success) {
-            const filename = `qr-${index + 1}-${qr.data.slice(0, 20)}.png`
+            const sanitizedName = sanitizeFilename(qr.data)
+            const filename = `qr-${String(index + 1).padStart(4, '0')}-${sanitizedName}.png`
             return `${index + 1},"${qr.data.replace(/"/g, '""')}",${filename}`
           }
           return ""
@@ -66,9 +74,12 @@ export default function QrResultsDisplay({ qrCodes, onBack, settings }: QrResult
 
   const handleDownloadSingle = (qr: QrResult) => {
     if (qr.qrDataUrl) {
+      const sanitizeFilename = (text: string) => {
+        return text.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').substring(0, 30)
+      }
       const a = document.createElement("a")
       a.href = qr.qrDataUrl
-      a.download = `qr-${qr.data.slice(0, 20)}.png`
+      a.download = `qr-${sanitizeFilename(qr.data)}.png`
       a.click()
     }
   }
