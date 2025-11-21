@@ -39,14 +39,14 @@ export default function QrResultsDisplay({ qrCodes, onBack, settings }: QrResult
       }
       const extension = getFileExtension()
 
-      // Create CSV file with QR code data - header without "Index" label
-      const csvHeader = ",QR Code Data,Filename\n"
+      // Create CSV file with QR code data - only QR Code Data and Filename columns
+      const csvHeader = "QR Code Data,Filename\n"
       const csvRows = qrCodes
         .map((qr, index) => {
           if (qr.success) {
             const sanitizedName = sanitizeFilename(qr.data)
             const filename = `qr-${String(index + 1).padStart(4, '0')}-${sanitizedName}.${extension}`
-            return `${index + 1},"${qr.data.replace(/"/g, '""')}",${filename}`
+            return `"${qr.data.replace(/"/g, '""')}",${filename}`
           }
           return ""
         })
