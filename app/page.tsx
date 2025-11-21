@@ -68,12 +68,17 @@ export default function Home() {
             
             let qrDataUrl: string
             
+            // Calculate width based on pixels per block (each block/module is this many pixels)
+            const width = settings.pixelsPerBlock * 25 // approximate QR code module count
+            const margin = settings.borderBlocks
+            
             if (settings.outputFormat === "SVG") {
               // For SVG, use toString method
               qrDataUrl = await QRCode.toString(data, {
                 errorCorrectionLevel: errorLevel,
                 type: 'svg',
-                width: 200,
+                width: width,
+                margin: margin,
                 color: {
                   dark: settings.fgColor,
                   light: settings.transparentBg ? "#00000000" : "#ffffff",
@@ -86,7 +91,8 @@ export default function Home() {
               const mimeType = settings.outputFormat === "JPG" ? "image/jpeg" : "image/png"
               qrDataUrl = await QRCode.toDataURL(data, {
                 errorCorrectionLevel: errorLevel,
-                width: 200,
+                width: width,
+                margin: margin,
                 type: mimeType,
                 rendererOpts: {
                   quality: settings.outputFormat === "JPG" ? 0.92 : undefined,
