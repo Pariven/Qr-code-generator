@@ -57,14 +57,47 @@ export default function Home() {
       const generated = await Promise.all(
         qrCodes.map(async (data, index) => {
           try {
-            const qrDataUrl = await QRCode.toDataURL(data, {
-              errorCorrectionLevel: settings.errorCorrection[0].toUpperCase(),
-              width: 200,
-              color: {
-                dark: settings.fgColor,
-                light: settings.transparentBg ? "#00000000" : "#ffffff",
-              },
-            })
+            // Map error correction level to QRCode library format
+            const errorCorrectionMap: { [key: string]: 'L' | 'M' | 'Q' | 'H' } = {
+              'Low': 'L',
+              'Medium': 'M',
+              'Quartile': 'Q',
+              'High': 'H'
+            }
+            const errorLevel = errorCorrectionMap[settings.errorCorrection] || 'M'
+            
+            let qrDataUrl: string
+            
+            if (settings.outputFormat === "SVG") {
+              // For SVG, use toString method
+              qrDataUrl = await QRCode.toString(data, {
+                errorCorrectionLevel: errorLevel,
+                type: 'svg',
+                width: 200,
+                color: {
+                  dark: settings.fgColor,
+                  light: settings.transparentBg ? "#00000000" : "#ffffff",
+                },
+              })
+              // Convert SVG string to data URL
+              qrDataUrl = 'data:image/svg+xml;base64,' + btoa(qrDataUrl)
+            } else {
+              // For PNG and JPG, use toDataURL
+              const mimeType = settings.outputFormat === "JPG" ? "image/jpeg" : "image/png"
+              qrDataUrl = await QRCode.toDataURL(data, {
+                errorCorrectionLevel: errorLevel,
+                width: 200,
+                type: mimeType,
+                rendererOpts: {
+                  quality: settings.outputFormat === "JPG" ? 0.92 : undefined,
+                },
+                color: {
+                  dark: settings.fgColor,
+                  light: settings.transparentBg ? "#00000000" : "#ffffff",
+                },
+              })
+            }
+            
             return { id: index, data, qrDataUrl, success: true }
           } catch (error) {
             console.error("[v0] Error generating QR code:", error)

@@ -31,23 +31,30 @@ export default function QrResultsDisplay({ qrCodes, onBack, settings }: QrResult
         return text.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').substring(0, 30)
       }
 
+      // Determine file extension based on output format
+      const getFileExtension = () => {
+        if (settings.outputFormat === "JPG") return "jpg"
+        if (settings.outputFormat === "SVG") return "svg"
+        return "png"
+      }
+      const extension = getFileExtension()
+
       // Add QR code images directly to the root of the ZIP (no nested folder)
       qrCodes.forEach((qr, index) => {
         if (qr.qrDataUrl) {
           const base64 = qr.qrDataUrl.split(",")[1]
           const sanitizedName = sanitizeFilename(qr.data)
-          const filename = `qr-${String(index + 1).padStart(4, '0')}-${sanitizedName}.png`
+          const filename = `qr-${String(index + 1).padStart(4, '0')}-${sanitizedName}.${extension}`
           zip.file(filename, base64, { base64: true })
         }
       })
 
-      // Create CSV file with QR code data
-      const csvHeader = "Index,QR Code Data,Filename\n"
+      // Create CSV file with QR code data (no header, just data)
       const csvRows = qrCodes
         .map((qr, index) => {
           if (qr.success) {
             const sanitizedName = sanitizeFilename(qr.data)
-            const filename = `qr-${String(index + 1).padStart(4, '0')}-${sanitizedName}.png`
+            const filename = `qr-${String(index + 1).padStart(4, '0')}-${sanitizedName}.${extension}`
             return `${index + 1},"${qr.data.replace(/"/g, '""')}",${filename}`
           }
           return ""
@@ -55,7 +62,7 @@ export default function QrResultsDisplay({ qrCodes, onBack, settings }: QrResult
         .filter((row) => row !== "")
         .join("\n")
       
-      const csvContent = csvHeader + csvRows
+      const csvContent = csvRows
       zip.file("qr-codes-data.csv", csvContent)
 
       const blob = await zip.generateAsync({ type: "blob" })
@@ -77,9 +84,10 @@ export default function QrResultsDisplay({ qrCodes, onBack, settings }: QrResult
       const sanitizeFilename = (text: string) => {
         return text.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').substring(0, 30)
       }
+      const extension = settings.outputFormat === "JPG" ? "jpg" : settings.outputFormat === "SVG" ? "svg" : "png"
       const a = document.createElement("a")
       a.href = qr.qrDataUrl
-      a.download = `qr-${sanitizeFilename(qr.data)}.png`
+      a.download = `qr-${sanitizeFilename(qr.data)}.${extension}`
       a.click()
     }
   }

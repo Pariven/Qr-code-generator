@@ -35,6 +35,7 @@ export default function ConfigurableOptions({ settings, updateSetting }: Configu
               >
                 <option>Low</option>
                 <option>Medium</option>
+                <option>Quartile</option>
                 <option>High</option>
               </select>
             </div>
