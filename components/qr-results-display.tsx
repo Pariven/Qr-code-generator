@@ -39,7 +39,8 @@ export default function QrResultsDisplay({ qrCodes, onBack, settings }: QrResult
       }
       const extension = getFileExtension()
 
-      // Create CSV file with QR code data (no header, just data) - ADD FIRST
+      // Create CSV file with QR code data - header without "Index" label
+      const csvHeader = ",QR Code Data,Filename\n"
       const csvRows = qrCodes
         .map((qr, index) => {
           if (qr.success) {
@@ -52,7 +53,7 @@ export default function QrResultsDisplay({ qrCodes, onBack, settings }: QrResult
         .filter((row) => row !== "")
         .join("\n")
       
-      const csvContent = csvRows
+      const csvContent = csvHeader + csvRows
       zip.file("qr-codes-data.csv", csvContent)
 
       // Add QR code images after CSV file
