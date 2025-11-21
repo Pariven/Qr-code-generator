@@ -25,14 +25,30 @@ export default function QrResultsDisplay({ qrCodes, onBack, settings }: QrResult
     setDownloading(true)
     try {
       const zip = new JSZip()
-      const folder = zip.folder("qr-codes")
 
+      // Add QR code images directly to the root of the ZIP (no nested folder)
       qrCodes.forEach((qr, index) => {
         if (qr.qrDataUrl) {
           const base64 = qr.qrDataUrl.split(",")[1]
-          folder?.file(`qr-${index + 1}-${qr.data.slice(0, 20)}.png`, base64, { base64: true })
+          zip.file(`qr-${index + 1}-${qr.data.slice(0, 20)}.png`, base64, { base64: true })
         }
       })
+
+      // Create CSV file with QR code data
+      const csvHeader = "Index,QR Code Data,Filename\n"
+      const csvRows = qrCodes
+        .map((qr, index) => {
+          if (qr.success) {
+            const filename = `qr-${index + 1}-${qr.data.slice(0, 20)}.png`
+            return `${index + 1},"${qr.data.replace(/"/g, '""')}",${filename}`
+          }
+          return ""
+        })
+        .filter((row) => row !== "")
+        .join("\n")
+      
+      const csvContent = csvHeader + csvRows
+      zip.file("qr-codes-data.csv", csvContent)
 
       const blob = await zip.generateAsync({ type: "blob" })
       const url = window.URL.createObjectURL(blob)
