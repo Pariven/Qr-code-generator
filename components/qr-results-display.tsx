@@ -39,17 +39,7 @@ export default function QrResultsDisplay({ qrCodes, onBack, settings }: QrResult
       }
       const extension = getFileExtension()
 
-      // Add QR code images directly to the root of the ZIP (no nested folder)
-      qrCodes.forEach((qr, index) => {
-        if (qr.qrDataUrl) {
-          const base64 = qr.qrDataUrl.split(",")[1]
-          const sanitizedName = sanitizeFilename(qr.data)
-          const filename = `qr-${String(index + 1).padStart(4, '0')}-${sanitizedName}.${extension}`
-          zip.file(filename, base64, { base64: true })
-        }
-      })
-
-      // Create CSV file with QR code data (no header, just data)
+      // Create CSV file with QR code data (no header, just data) - ADD FIRST
       const csvRows = qrCodes
         .map((qr, index) => {
           if (qr.success) {
@@ -64,6 +54,16 @@ export default function QrResultsDisplay({ qrCodes, onBack, settings }: QrResult
       
       const csvContent = csvRows
       zip.file("qr-codes-data.csv", csvContent)
+
+      // Add QR code images after CSV file
+      qrCodes.forEach((qr, index) => {
+        if (qr.qrDataUrl) {
+          const base64 = qr.qrDataUrl.split(",")[1]
+          const sanitizedName = sanitizeFilename(qr.data)
+          const filename = `qr-${String(index + 1).padStart(4, '0')}-${sanitizedName}.${extension}`
+          zip.file(filename, base64, { base64: true })
+        }
+      })
 
       const blob = await zip.generateAsync({ type: "blob" })
       const url = window.URL.createObjectURL(blob)
