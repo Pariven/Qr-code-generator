@@ -99,8 +99,8 @@ export default function CreditBalanceDisplay({ onBuyCredits, refresh }: CreditBa
 
     loadData()
 
-    // Set up interval to check for updates
-    const interval = setInterval(loadData, 5000)
+    // Set up interval to check for updates - reduced to 10 seconds to prevent "unresponsive" warnings
+    const interval = setInterval(loadData, 10000)
 
     return () => clearInterval(interval)
   }, [refresh])
