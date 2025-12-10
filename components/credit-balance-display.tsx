@@ -33,8 +33,13 @@ export default function CreditBalanceDisplay({ onBuyCredits, refresh }: CreditBa
     // Load balance and transactions from database
     const loadData = async () => {
       try {
+        // Add timestamp to prevent caching
+        const timestamp = Date.now()
+        
         // Check authentication first
-        const sessionResponse = await fetch("/api/auth/session")
+        const sessionResponse = await fetch(`/api/auth/session?t=${timestamp}`, {
+          cache: 'no-store'
+        })
         const sessionData = await sessionResponse.json()
         setIsAuthenticated(sessionData.isLoggedIn)
 
@@ -42,13 +47,17 @@ export default function CreditBalanceDisplay({ onBuyCredits, refresh }: CreditBa
           return
         }
 
-        const balanceResponse = await fetch("/api/credits/balance")
+        const balanceResponse = await fetch(`/api/credits/balance?t=${timestamp}`, {
+          cache: 'no-store'
+        })
         if (balanceResponse.ok) {
           const balanceData = await balanceResponse.json()
           setBalance(balanceData)
         }
 
-        const transactionsResponse = await fetch("/api/credits/transactions")
+        const transactionsResponse = await fetch(`/api/credits/transactions?t=${timestamp}`, {
+          cache: 'no-store'
+        })
         if (transactionsResponse.ok) {
           const transactionsData = await transactionsResponse.json()
           setTransactions(transactionsData.map((t: any) => ({

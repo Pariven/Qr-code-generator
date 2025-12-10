@@ -23,7 +23,13 @@ export async function GET(req: NextRequest) {
       LIMIT 100
     `
 
-    return NextResponse.json(transactions)
+    return NextResponse.json(transactions, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      }
+    })
   } catch (error) {
     console.error('Get transactions error:', error)
     return NextResponse.json(

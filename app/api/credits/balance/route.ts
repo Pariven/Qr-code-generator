@@ -42,6 +42,12 @@ export async function GET(req: NextRequest) {
       used: creditData.used,
       remaining: creditData.remaining,
       lastUpdated: creditData.updated_at,
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      }
     })
   } catch (error) {
     console.error('Get credits error:', error)
