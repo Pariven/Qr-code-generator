@@ -1,8 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe-server'
+import { getIronSession } from 'iron-session'
+import { sessionOptions, SessionData } from '@/lib/session'
+import { cookies } from 'next/headers'
 
 export async function POST(req: NextRequest) {
   try {
+    // Get user session to retrieve email
+    const session = await getIronSession<SessionData>(await cookies(), sessionOptions)
+    
+    if (!session.isLoggedIn || !session.email) {
+      return NextResponse.json(
+        { error: 'You must be logged in to purchase credits' },
+        { status: 401 }
+      )
+    }
+
     const { tierId, tierName, price, credits } = await req.json()
 
     if (!price || !credits) {
@@ -13,8 +26,9 @@ export async function POST(req: NextRequest) {
     }
 
     // Create Stripe Checkout Session
-    const session = await stripe.checkout.sessions.create({
+    const checkoutSession = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
+      customer_email: session.email, // Add customer email from session
       line_items: [
         {
           price_data: {
@@ -37,10 +51,11 @@ export async function POST(req: NextRequest) {
         tierName,
         credits: credits.toString(),
         price: price.toString(),
+        userEmail: session.email, // Add email to metadata as backup
       },
     })
 
-    return NextResponse.json({ sessionId: session.id })
+    return NextResponse.json({ sessionId: checkoutSession.id })
   } catch (error: any) {
     console.error('Stripe checkout error:', error)
     return NextResponse.json(
