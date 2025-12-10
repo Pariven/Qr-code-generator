@@ -11,6 +11,7 @@ import QrResultsDisplay from "@/components/qr-results-display"
 import Footer from "@/components/footer"
 import CreditBalanceDisplay from "@/components/credit-balance-display"
 import PricingCards from "@/components/pricing-cards"
+import QRLoading from "@/components/qr-loading"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Loader2 } from "lucide-react"
 
@@ -23,6 +24,7 @@ export default function Home() {
   const [showResults, setShowResults] = useState(false)
   const [generatedQrs, setGeneratedQrs] = useState<any[]>([])
   const [isGenerating, setIsGenerating] = useState(false)
+  const [generatingCount, setGeneratingCount] = useState(0)
   const [expandOptions, setExpandOptions] = useState(false)
   const [activeTab, setActiveTab] = useState<"generator" | "pricing">("generator")
   const [refreshBalance, setRefreshBalance] = useState(0)
@@ -113,6 +115,7 @@ export default function Home() {
     }
 
     setIsGenerating(true)
+    setGeneratingCount(qrCodes.length)
     try {
       const QRCode = (await import("qrcode")).default
 
@@ -215,6 +218,10 @@ export default function Home() {
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     )
+  }
+
+  if (isGenerating) {
+    return <QRLoading count={generatingCount} />
   }
 
   if (showResults) {
