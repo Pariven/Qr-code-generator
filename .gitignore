@@ -24,6 +24,7 @@ yarn-error.log*
 pnpm-debug.log*
 
 # local env files
+.env
 .env*.local
 
 # vercel
@@ -32,3 +33,7 @@ pnpm-debug.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# lock files (using npm)
+pnpm-lock.yaml
+yarn.lock
