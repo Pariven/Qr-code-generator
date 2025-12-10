@@ -74,6 +74,12 @@ export default function CreditBalanceDisplay({ onBuyCredits, refresh }: CreditBa
   }, [refresh])
 
   const usagePercentage = balance.total > 0 ? (balance.used / balance.total) * 100 : 0
+  
+  // Calculate free vs purchased credits
+  const freeCredits = Math.min(balance.total, 100)
+  const purchasedCredits = Math.max(0, balance.total - 100)
+  const freeCreditsRemaining = Math.max(0, Math.min(freeCredits - balance.used, freeCredits))
+  const purchasedCreditsRemaining = Math.max(0, balance.remaining - freeCreditsRemaining)
 
   // Show signup prompt if not authenticated
   if (!isAuthenticated) {
@@ -166,9 +172,37 @@ export default function CreditBalanceDisplay({ onBuyCredits, refresh }: CreditBa
             </div>
           </div>
 
+          {/* Credit Breakdown */}
           {balance.total > 0 && (
-            <div className="space-y-2">
-              <Progress value={100 - usagePercentage} className="h-2" />
+            <div className="space-y-3">
+              <div className="flex gap-4 text-sm">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                  <span className="text-muted-foreground">Free: <span className="font-medium text-foreground">{formatNumber(freeCreditsRemaining)}</span></span>
+                </div>
+                {purchasedCredits > 0 && (
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                    <span className="text-muted-foreground">Purchased: <span className="font-medium text-foreground">{formatNumber(purchasedCreditsRemaining)}</span></span>
+                  </div>
+                )}
+              </div>
+
+              {/* Multi-color Progress Bar */}
+              <div className="relative h-2 bg-muted rounded-full overflow-hidden">
+                <div 
+                  className="absolute top-0 left-0 h-full bg-green-500 transition-all"
+                  style={{ width: `${(freeCreditsRemaining / balance.total) * 100}%` }}
+                ></div>
+                <div 
+                  className="absolute top-0 h-full bg-blue-500 transition-all"
+                  style={{ 
+                    left: `${(freeCreditsRemaining / balance.total) * 100}%`,
+                    width: `${(purchasedCreditsRemaining / balance.total) * 100}%`
+                  }}
+                ></div>
+              </div>
+
               <div className="flex justify-between text-xs text-muted-foreground">
                 <span>{balance.remaining > 0 ? `${formatNumber(balance.remaining)} available` : 'No credits remaining'}</span>
                 <span>{formatNumber(balance.used)} used</span>
