@@ -20,7 +20,7 @@ export default function QrInputArea({ qrCodes, setQrCodes, setPreviewQr }: QrInp
       .split("\n")
       .map((line) => line.trim())
       .filter((line) => line.length > 0)
-      .slice(0, 2000000)
+      .slice(0, 50000)
 
     setQrCodes(lines)
     if (lines.length > 0) {
@@ -44,7 +44,7 @@ export default function QrInputArea({ qrCodes, setQrCodes, setPreviewQr }: QrInp
           .split("\n")
           .map((line) => line.trim())
           .filter((line) => line.length > 0)
-          .slice(0, 2000000)
+          .slice(0, 50000)
 
         setQrCodes(lines)
         if (lines.length > 0) {
@@ -63,7 +63,7 @@ export default function QrInputArea({ qrCodes, setQrCodes, setPreviewQr }: QrInp
           QR Code Data
         </label>
         <p className="text-muted-foreground text-sm mb-4">
-          Enter one URL/text per line or drag a CSV file. Maximum 2,000,000 codes.
+          Enter one URL/text per line or drag a CSV file. Maximum 50,000 codes per batch.
         </p>
       </div>
 
@@ -78,8 +78,8 @@ export default function QrInputArea({ qrCodes, setQrCodes, setPreviewQr }: QrInp
       />
 
       <div className="flex items-center justify-between text-sm text-muted-foreground">
-        <span className="font-medium">{qrCodes.length.toLocaleString()} / 2,000,000 codes</span>
-        {qrCodes.length >= 2000000 && <span className="text-destructive font-medium">Maximum reached</span>}
+        <span className="font-medium">{qrCodes.length.toLocaleString()} / 50,000 codes</span>
+        {qrCodes.length >= 50000 && <span className="text-destructive font-medium">Maximum reached</span>}
       </div>
     </div>
   )

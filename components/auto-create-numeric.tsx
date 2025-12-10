@@ -16,7 +16,7 @@ export default function AutoCreateNumeric({ onGenerate }: AutoCreateNumericProps
 
   const generateNumericList = () => {
     const codes: string[] = []
-    const endValue = Math.min(end, 2000000)
+    const endValue = Math.min(end, 50000)
 
     // Calculate padding width
     const maxLength = endValue.toString().length
@@ -49,12 +49,12 @@ export default function AutoCreateNumeric({ onGenerate }: AutoCreateNumericProps
               />
             </div>
             <div>
-              <label className="text-muted-foreground text-xs font-medium mb-1 block">End (max 2,000,000)</label>
+              <label className="text-muted-foreground text-xs font-medium mb-1 block">End (max 50,000)</label>
               <input
                 type="number"
                 value={end}
-                onChange={(e) => setEnd(Math.min(Number(e.target.value), 2000000))}
-                max={2000000}
+                onChange={(e) => setEnd(Math.min(Number(e.target.value), 50000))}
+                max={50000}
                 className="w-full px-3 py-2 border border-input rounded text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>

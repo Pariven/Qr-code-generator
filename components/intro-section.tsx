@@ -5,7 +5,7 @@ export default function IntroSection() {
         Generate Bulk QR Codes
       </h1>
       <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto text-balance leading-relaxed">
-        Create, customize, and download up to 2,000,000 QR codes instantly. <strong>Sign up to get 100 FREE QR credits!</strong>
+        Create, customize, and download up to 50,000 QR codes per batch. <strong>Sign up to get 100 FREE QR credits!</strong> Generate up to 2 million QR codes with purchased credits.
       </p>
     </div>
   )

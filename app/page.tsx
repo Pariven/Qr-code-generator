@@ -73,8 +73,8 @@ export default function Home() {
       return
     }
 
-    if (qrCodes.length > 2000000) {
-      alert("Maximum 2,000,000 QR codes allowed. Please reduce your input.")
+    if (qrCodes.length > 50000) {
+      alert("Maximum 50,000 QR codes per batch. Please reduce your input or generate in multiple batches.")
       return
     }
 
