@@ -12,10 +12,15 @@ export async function POST(req: NextRequest) {
   let event
 
   try {
-    // For local testing without Stripe CLI, skip webhook verification
-    if (!signature || !webhookSecret || webhookSecret === 'whsec_test_local_secret') {
-      console.log('⚠️ Webhook signature verification skipped for local testing')
+    // For local development: skip signature verification to allow direct webhook calls
+    // In production, Stripe will send real webhooks with valid signatures
+    const isLocalDev = process.env.NODE_ENV === 'development'
+    
+    if (isLocalDev) {
+      console.log('⚠️ Local development mode - accepting webhook without signature verification')
       event = JSON.parse(body)
+    } else if (!signature || !webhookSecret) {
+      throw new Error('Missing webhook signature or secret')
     } else {
       event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
     }

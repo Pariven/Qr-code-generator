@@ -16,26 +16,29 @@ function SuccessPageContent() {
   useEffect(() => {
     const verifyPayment = async () => {
       const sessionId = searchParams.get('session_id')
-      const credits = searchParams.get('credits')
-      const price = searchParams.get('price')
 
-      if (!sessionId || !credits || !price) {
+      if (!sessionId) {
         setError('Invalid payment session')
         setIsVerifying(false)
         return
       }
 
       try {
-        // Verify the session with backend
-        const response = await fetch(`/api/verify-session?session_id=${sessionId}`)
+        // Call the new payment verification endpoint
+        const response = await fetch('/api/verify-payment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ sessionId }),
+        })
+
         const data = await response.json()
 
-        if (data.status === 'paid') {
-          // Add credits to user account
-          addCredits(parseInt(credits), parseFloat(price))
+        if (data.success) {
           setIsVerifying(false)
         } else {
-          setError('Payment not completed')
+          setError(data.error || 'Payment verification failed')
           setIsVerifying(false)
         }
       } catch (err) {
