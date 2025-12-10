@@ -138,7 +138,7 @@ export default function CreditBalanceDisplay({ onBuyCredits, refresh }: CreditBa
               <div className="text-xs text-muted-foreground space-y-1">
                 <p>✓ Sign up in 30 seconds</p>
                 <p>✓ No credit card required</p>
-                <p>✓ Credits never expire</p>
+                <p>✓ Free credits valid for 1 year</p>
               </div>
             </div>
 

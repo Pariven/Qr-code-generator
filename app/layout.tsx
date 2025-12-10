@@ -14,10 +14,16 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: "/icon.svg",
-        type: "image/svg+xml",
+        url: "/favicon.png",
+        type: "image/png",
+      },
+      {
+        url: "/favicon.ico",
+        type: "image/x-icon",
       },
     ],
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
   },
   openGraph: {
     title: "Free QR Code Generator - Create Custom QR Codes with Logo",
@@ -25,11 +31,20 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "QR Noir Tech",
     locale: "en_US",
+    images: [
+      {
+        url: "/favicon.png",
+        width: 1200,
+        height: 630,
+        alt: "Noir Intelligence - QR Code Generator",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Free QR Code Generator - Bulk Create Custom QR Codes",
     description: "Generate unlimited free QR codes with logos & custom designs. Perfect for business, marketing & events.",
+    images: ["/favicon.png"],
   },
   robots: {
     index: true,

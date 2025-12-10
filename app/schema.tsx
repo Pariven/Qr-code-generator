@@ -31,7 +31,7 @@ export const webApplicationSchema = {
     "Multiple download formats: PNG, SVG, JPG",
     "Trackable QR codes with scan analytics",
     "Dynamic QR codes - edit content anytime",
-    "No expiration - lifetime validity",
+    "Credits valid for 1 year (lifetime for $400+ purchases)",
     "Free 100 QR codes on signup",
     "Commercial use allowed",
     "High resolution print quality",

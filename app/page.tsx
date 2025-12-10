@@ -364,8 +364,8 @@ export default function Home() {
                 <div className="bg-card border border-border/50 rounded-lg p-6 max-w-3xl mx-auto">
                   <h3 className="font-semibold text-lg mb-4">Why Noir Intelligence QR?</h3>
                   <ul className="space-y-2 text-sm text-muted-foreground">
-                    <li>✓ Credits never expire - use them at your own pace</li>
-                    <li>✓ Generate up to 5,000 QR codes at once</li>
+                    <li>✓ Credits valid for 1 year (lifetime for $400+ purchases)</li>
+                    <li>✓ Generate up to 50,000 QR codes per batch</li>
                     <li>✓ Multiple output formats: PNG, SVG, JPG</li>
                     <li>✓ Customizable error correction, colors, and sizes</li>
                     <li>✓ Bulk download with ZIP support</li>
