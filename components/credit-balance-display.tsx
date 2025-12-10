@@ -36,10 +36,20 @@ export default function CreditBalanceDisplay({ onBuyCredits, refresh }: CreditBa
         // Add timestamp to prevent caching
         const timestamp = Date.now()
         
-        // Check authentication first
+        // Check authentication first with timeout
         const sessionResponse = await fetch(`/api/auth/session?t=${timestamp}`, {
-          cache: 'no-store'
+          cache: 'no-store',
+          signal: AbortSignal.timeout(10000) // 10 second timeout
+        }).catch((err) => {
+          console.warn("Session fetch failed:", err.message)
+          return null
         })
+        
+        if (!sessionResponse || !sessionResponse.ok) {
+          setIsAuthenticated(false)
+          return
+        }
+        
         const sessionData = await sessionResponse.json()
         setIsAuthenticated(sessionData.isLoggedIn)
 
@@ -47,18 +57,30 @@ export default function CreditBalanceDisplay({ onBuyCredits, refresh }: CreditBa
           return
         }
 
+        // Fetch balance with timeout
         const balanceResponse = await fetch(`/api/credits/balance?t=${timestamp}`, {
-          cache: 'no-store'
+          cache: 'no-store',
+          signal: AbortSignal.timeout(10000)
+        }).catch((err) => {
+          console.warn("Balance fetch failed:", err.message)
+          return null
         })
-        if (balanceResponse.ok) {
+        
+        if (balanceResponse && balanceResponse.ok) {
           const balanceData = await balanceResponse.json()
           setBalance(balanceData)
         }
 
+        // Fetch transactions with timeout
         const transactionsResponse = await fetch(`/api/credits/transactions?t=${timestamp}`, {
-          cache: 'no-store'
+          cache: 'no-store',
+          signal: AbortSignal.timeout(10000)
+        }).catch((err) => {
+          console.warn("Transactions fetch failed:", err.message)
+          return null
         })
-        if (transactionsResponse.ok) {
+        
+        if (transactionsResponse && transactionsResponse.ok) {
           const transactionsData = await transactionsResponse.json()
           setTransactions(transactionsData.map((t: any) => ({
             id: t.id.toString(),
@@ -71,6 +93,7 @@ export default function CreditBalanceDisplay({ onBuyCredits, refresh }: CreditBa
         }
       } catch (error) {
         console.error("Failed to load credit data:", error)
+        // Don't throw - just log and continue
       }
     }
 
