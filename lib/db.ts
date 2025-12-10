@@ -2,32 +2,24 @@ import { neon } from '@neondatabase/serverless'
 
 let sqlInstance: ReturnType<typeof neon> | null = null
 
-export function getDb() {
+function getSql() {
   if (!sqlInstance) {
-    if (!process.env.DATABASE_URL) {
-      // Return a dummy function during build time
-      if (process.env.NODE_ENV === 'production' && !process.env.VERCEL_ENV) {
-        console.warn('DATABASE_URL not set, using dummy connection for build')
-        return (() => Promise.resolve([])) as any
-      }
-      throw new Error('DATABASE_URL must be set in environment variables')
+    const dbUrl = process.env.DATABASE_URL
+    if (!dbUrl) {
+      throw new Error('DATABASE_URL environment variable is not set')
     }
-    sqlInstance = neon(process.env.DATABASE_URL)
+    sqlInstance = neon(dbUrl)
   }
   return sqlInstance
 }
 
-// Lazy initialization - only create connection when actually used
-export const sql = new Proxy({} as ReturnType<typeof neon>, {
-  get(target, prop) {
-    const db = getDb()
-    return db[prop as keyof typeof db]
-  },
-  apply(target, thisArg, args) {
-    const db = getDb()
-    return (db as any)(...args)
-  }
-})
+// Export a tagged template function that gets the SQL instance at runtime
+export function sql(strings: TemplateStringsArray, ...values: any[]) {
+  return getSql()(strings, ...values)
+}
+
+// For backwards compatibility
+export const getDb = getSql
 
 // Initialize database tables
 export async function initDatabase() {
