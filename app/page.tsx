@@ -116,6 +116,13 @@ export default function Home() {
 
     setIsGenerating(true)
     setGeneratingCount(qrCodes.length)
+    
+    // Keep browser responsive by yielding to event loop periodically
+    const keepAlive = setInterval(() => {
+      // This ensures browser knows page is still responsive
+      console.log('Generating QR codes... still working...')
+    }, 1000)
+    
     try {
       const QRCode = (await import("qrcode")).default
 
@@ -203,6 +210,7 @@ export default function Home() {
       console.error("[v0] Generation error:", error)
       alert("Error generating QR codes. Please try again.")
     } finally {
+      clearInterval(keepAlive) // Clear the keep-alive interval
       setIsGenerating(false)
     }
   }

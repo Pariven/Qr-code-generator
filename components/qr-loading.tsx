@@ -1,8 +1,29 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 
 export default function QRLoading({ count }: { count?: number }) {
+  const [showLongWaitMessage, setShowLongWaitMessage] = useState(false)
+  const [elapsedSeconds, setElapsedSeconds] = useState(0)
+
+  useEffect(() => {
+    // Show "taking longer than expected" message after 10 seconds
+    const longWaitTimer = setTimeout(() => {
+      setShowLongWaitMessage(true)
+    }, 10000)
+
+    // Update elapsed time counter
+    const counterInterval = setInterval(() => {
+      setElapsedSeconds(prev => prev + 1)
+    }, 1000)
+
+    return () => {
+      clearTimeout(longWaitTimer)
+      clearInterval(counterInterval)
+    }
+  }, [])
+
   return (
     <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex items-center justify-center">
       <Card className="w-full max-w-md mx-4">
@@ -24,9 +45,24 @@ export default function QRLoading({ count }: { count?: number }) {
               <p className="text-muted-foreground">
                 {count ? `Creating ${count.toLocaleString()} QR code${count > 1 ? 's' : ''}` : 'Please wait'}
               </p>
-              <p className="text-sm text-muted-foreground">
-                This may take a moment
-              </p>
+              
+              {showLongWaitMessage ? (
+                <div className="space-y-2 mt-4">
+                  <p className="text-sm text-yellow-600 dark:text-yellow-500 font-semibold">
+                    ⏳ Taking longer than expected...
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Please wait, this can take a few minutes for large batches.
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Elapsed time: {elapsedSeconds}s
+                  </p>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  This may take a moment
+                </p>
+              )}
             </div>
 
             {/* Progress Indicator */}
