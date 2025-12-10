@@ -5,6 +5,11 @@ let sqlInstance: ReturnType<typeof neon> | null = null
 export function getDb() {
   if (!sqlInstance) {
     if (!process.env.DATABASE_URL) {
+      // Return a dummy function during build time
+      if (process.env.NODE_ENV === 'production' && !process.env.VERCEL_ENV) {
+        console.warn('DATABASE_URL not set, using dummy connection for build')
+        return (() => Promise.resolve([])) as any
+      }
       throw new Error('DATABASE_URL must be set in environment variables')
     }
     sqlInstance = neon(process.env.DATABASE_URL)
@@ -12,7 +17,17 @@ export function getDb() {
   return sqlInstance
 }
 
-export const sql = getDb()
+// Lazy initialization - only create connection when actually used
+export const sql = new Proxy({} as ReturnType<typeof neon>, {
+  get(target, prop) {
+    const db = getDb()
+    return db[prop as keyof typeof db]
+  },
+  apply(target, thisArg, args) {
+    const db = getDb()
+    return (db as any)(...args)
+  }
+})
 
 // Initialize database tables
 export async function initDatabase() {
