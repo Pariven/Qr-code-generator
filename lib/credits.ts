@@ -30,7 +30,7 @@ export interface CreditBalance {
 
 export interface Transaction {
   id: string
-  type: "purchase" | "usage"
+  type: "purchase" | "usage" | "monthly_bonus"
   amount: number
   credits: number
   timestamp: string

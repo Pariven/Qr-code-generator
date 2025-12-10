@@ -171,6 +171,7 @@ export default function RegisterPage() {
           </div>
           <div className="bg-muted rounded-lg p-3 text-xs text-muted-foreground">
             ✓ 100 free QR credits upon signup<br />
+            ✓ Get 100 FREE credits every month<br />
             ✓ Free credits valid for 1 year<br />
             ✓ No credit card required
           </div>

@@ -107,6 +107,10 @@ export default function PricingCards({ onPurchaseComplete }: PricingCardsProps) 
                   </div>
                   <div className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm">Get 100 FREE credits every month</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
                     <span className="text-sm">{tier.price >= 400 ? 'Credits never expire' : 'Credits valid for 1 year'}</span>
                   </div>
                   <div className="flex items-start gap-2">

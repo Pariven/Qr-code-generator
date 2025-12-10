@@ -28,6 +28,8 @@ export default function CreditBalanceDisplay({ onBuyCredits, refresh }: CreditBa
   })
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [showHistory, setShowHistory] = useState(false)
+  const [monthlyBonusReceived, setMonthlyBonusReceived] = useState(false)
+  const [showMonthlyBonus, setShowMonthlyBonus] = useState(false)
 
   useEffect(() => {
     // Load balance and transactions from database
@@ -55,6 +57,30 @@ export default function CreditBalanceDisplay({ onBuyCredits, refresh }: CreditBa
 
         if (!sessionData.isLoggedIn) {
           return
+        }
+
+        // Check for monthly bonus (only once per session)
+        if (!monthlyBonusReceived) {
+          const bonusResponse = await fetch('/api/credits/monthly-bonus', {
+            method: 'POST',
+            cache: 'no-store',
+            signal: AbortSignal.timeout(10000)
+          }).catch((err) => {
+            console.warn("Monthly bonus check failed:", err.message)
+            return null
+          })
+
+          if (bonusResponse && bonusResponse.ok) {
+            const bonusData = await bonusResponse.json()
+            if (bonusData.success && bonusData.creditsAdded === 100) {
+              setShowMonthlyBonus(true)
+              setMonthlyBonusReceived(true)
+              // Auto-hide banner after 10 seconds
+              setTimeout(() => setShowMonthlyBonus(false), 10000)
+            } else if (!bonusData.alreadyReceived) {
+              setMonthlyBonusReceived(true)
+            }
+          }
         }
 
         // Fetch balance with timeout
@@ -103,7 +129,7 @@ export default function CreditBalanceDisplay({ onBuyCredits, refresh }: CreditBa
     const interval = setInterval(loadData, 10000)
 
     return () => clearInterval(interval)
-  }, [refresh])
+  }, [refresh, monthlyBonusReceived])
 
   const usagePercentage = balance.total > 0 ? (balance.used / balance.total) * 100 : 0
   
@@ -117,6 +143,23 @@ export default function CreditBalanceDisplay({ onBuyCredits, refresh }: CreditBa
   if (!isAuthenticated) {
     return (
       <div className="space-y-4">
+        {/* Monthly Bonus Info Banner */}
+        <Card className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-purple-500/30">
+          <CardContent className="pt-4">
+            <div className="flex items-start gap-3">
+              <div className="bg-purple-500 rounded-full p-2 mt-0.5">
+                <TrendingUp className="w-4 h-4 text-white" />
+              </div>
+              <div className="flex-1">
+                <div className="font-semibold text-sm mb-1">🎁 Get 100 FREE Credits Every Month!</div>
+                <div className="text-xs text-muted-foreground">
+                  Sign up now and receive 100 bonus QR credits automatically every month. No catch, no credit card required!
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         <Card className="border-primary/50">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg flex items-center gap-2">
@@ -137,6 +180,7 @@ export default function CreditBalanceDisplay({ onBuyCredits, refresh }: CreditBa
               </div>
               <div className="text-xs text-muted-foreground space-y-1">
                 <p>✓ Sign up in 30 seconds</p>
+                <p>✓ Get 100 FREE credits every month</p>
                 <p>✓ No credit card required</p>
                 <p>✓ Free credits valid for 1 year</p>
               </div>
@@ -181,6 +225,49 @@ export default function CreditBalanceDisplay({ onBuyCredits, refresh }: CreditBa
 
   return (
     <div className="space-y-4">
+      {/* Monthly Bonus Banner */}
+      {showMonthlyBonus && (
+        <Card className="bg-gradient-to-r from-green-500/10 to-blue-500/10 border-green-500">
+          <CardContent className="pt-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="bg-green-500 rounded-full p-2">
+                  <Coins className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <div className="font-bold text-green-600">🎉 Monthly Bonus Received!</div>
+                  <div className="text-sm text-muted-foreground">+100 free QR credits added to your account</div>
+                </div>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setShowMonthlyBonus(false)}
+              >
+                ✕
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Info Banner - Monthly Credits */}
+      <Card className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-purple-500/30">
+        <CardContent className="pt-4">
+          <div className="flex items-start gap-3">
+            <div className="bg-purple-500 rounded-full p-2 mt-0.5">
+              <TrendingUp className="w-4 h-4 text-white" />
+            </div>
+            <div className="flex-1">
+              <div className="font-semibold text-sm mb-1">Get 100 FREE Credits Every Month! 🎁</div>
+              <div className="text-xs text-muted-foreground">
+                All users receive 100 bonus QR credits automatically on the 1st of each month. Keep creating amazing QR codes!
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Main Balance Card */}
       <Card>
         <CardHeader className="pb-3">
@@ -292,25 +379,40 @@ export default function CreditBalanceDisplay({ onBuyCredits, refresh }: CreditBa
                               <div className="flex items-center gap-2">
                                 {transaction.type === "purchase" ? (
                                   <TrendingUp className="w-4 h-4 text-green-500" />
+                                ) : transaction.type === "monthly_bonus" ? (
+                                  <div className="relative">
+                                    <Coins className="w-4 h-4 text-purple-500" />
+                                    <span className="absolute -top-1 -right-1 text-xs">🎁</span>
+                                  </div>
                                 ) : (
                                   <Coins className="w-4 h-4 text-blue-500" />
                                 )}
                                 <span className="font-medium text-sm">
                                   {transaction.description}
                                 </span>
+                                {transaction.type === "monthly_bonus" && (
+                                  <Badge variant="outline" className="ml-2 text-xs bg-purple-500/10 text-purple-600 border-purple-500">
+                                    Monthly Bonus
+                                  </Badge>
+                                )}
                               </div>
                               <div className="text-xs text-muted-foreground mt-1">
                                 {new Date(transaction.timestamp).toLocaleString()}
                               </div>
                             </div>
                             <div className="text-right">
-                              <div className={`font-semibold ${transaction.type === "purchase" ? "text-green-600" : "text-gray-600"}`}>
-                                {transaction.type === "purchase" ? "+" : "-"}
+                              <div className={`font-semibold ${transaction.type === "purchase" || transaction.type === "monthly_bonus" ? "text-green-600" : "text-gray-600"}`}>
+                                {transaction.type === "purchase" || transaction.type === "monthly_bonus" ? "+" : "-"}
                                 {formatNumber(transaction.credits)}
                               </div>
                               {transaction.type === "purchase" && (
                                 <div className="text-xs text-muted-foreground">
                                   ${transaction.amount}
+                                </div>
+                              )}
+                              {transaction.type === "monthly_bonus" && (
+                                <div className="text-xs text-purple-600">
+                                  FREE
                                 </div>
                               )}
                             </div>

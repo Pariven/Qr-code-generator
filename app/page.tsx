@@ -321,7 +321,7 @@ export default function Home() {
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="bg-card border border-border/50 rounded-lg p-4 sm:p-5">
                       <p className="text-sm font-semibold text-muted-foreground mb-1">Limit</p>
-                      <p className="text-2xl font-bold text-foreground">5,000</p>
+                      <p className="text-2xl font-bold text-foreground">50,000</p>
                       <p className="text-xs text-muted-foreground mt-2">Codes per batch</p>
                     </div>
                     <div className="bg-card border border-border/50 rounded-lg p-4 sm:p-5">
@@ -329,10 +329,10 @@ export default function Home() {
                       <p className="text-2xl font-bold text-foreground">3</p>
                       <p className="text-xs text-muted-foreground mt-2">PNG, SVG, JPG</p>
                     </div>
-                    <div className="bg-card border border-border/50 rounded-lg p-4 sm:p-5">
-                      <p className="text-sm font-semibold text-muted-foreground mb-1">Credits</p>
-                      <p className="text-2xl font-bold text-foreground">Never Expire</p>
-                      <p className="text-xs text-muted-foreground mt-2">Buy once, use forever</p>
+                    <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/30 rounded-lg p-4 sm:p-5">
+                      <p className="text-sm font-semibold text-purple-600 mb-1">🎁 Monthly Bonus</p>
+                      <p className="text-2xl font-bold text-foreground">100 FREE</p>
+                      <p className="text-xs text-purple-600 mt-2">Credits every month</p>
                     </div>
                   </div>
                 </div>
@@ -364,6 +364,7 @@ export default function Home() {
                 <div className="bg-card border border-border/50 rounded-lg p-6 max-w-3xl mx-auto">
                   <h3 className="font-semibold text-lg mb-4">Why Noir Intelligence QR?</h3>
                   <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li>✓ Get 100 FREE credits every month for all users</li>
                     <li>✓ Credits valid for 1 year (lifetime for $400+ purchases)</li>
                     <li>✓ Generate up to 50,000 QR codes per batch</li>
                     <li>✓ Multiple output formats: PNG, SVG, JPG</li>
