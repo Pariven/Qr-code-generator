@@ -32,14 +32,15 @@ export async function POST(req: NextRequest) {
       FOR UPDATE
     `
 
-    if (credits.length === 0) {
+    const creditsArray = Array.isArray(credits) ? credits : credits.rows
+    if (!creditsArray || creditsArray.length === 0) {
       return NextResponse.json(
         { error: 'Credit balance not found' },
         { status: 404 }
       )
     }
 
-    const currentCredits = credits[0]
+    const currentCredits = creditsArray[0] as any
 
     if (currentCredits.remaining < count) {
       return NextResponse.json(
@@ -62,6 +63,9 @@ export async function POST(req: NextRequest) {
       RETURNING total, used, remaining
     `
 
+    const updatedArray = Array.isArray(updated) ? updated : updated.rows
+    const updatedData = updatedArray[0] as any
+
     // Record transaction
     await sql`
       INSERT INTO transactions (user_id, type, amount, credits, description)
@@ -71,9 +75,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       balance: {
-        total: updated[0].total,
-        used: updated[0].used,
-        remaining: updated[0].remaining,
+        total: updatedData.total,
+        used: updatedData.used,
+        remaining: updatedData.remaining,
       },
     })
   } catch (error) {

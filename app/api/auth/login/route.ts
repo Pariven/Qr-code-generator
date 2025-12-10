@@ -21,14 +21,15 @@ export async function POST(req: NextRequest) {
       SELECT id, email, name, password_hash FROM users WHERE email = ${email}
     `
 
-    if (users.length === 0) {
+    const usersArray = Array.isArray(users) ? users : users.rows
+    if (!usersArray || usersArray.length === 0) {
       return NextResponse.json(
         { error: 'Invalid email or password' },
         { status: 401 }
       )
     }
 
-    const user = users[0]
+    const user = usersArray[0] as any
 
     // Verify password
     const isValidPassword = await bcrypt.compare(password, user.password_hash)

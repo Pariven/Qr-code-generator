@@ -21,7 +21,8 @@ export async function GET(req: NextRequest) {
       WHERE user_id = ${session.userId}
     `
 
-    if (credits.length === 0) {
+    const creditsArray = Array.isArray(credits) ? credits : credits.rows
+    if (!creditsArray || creditsArray.length === 0) {
       // Create initial credits if not exist
       await sql`
         INSERT INTO credits (user_id, total, used, remaining)
@@ -35,11 +36,12 @@ export async function GET(req: NextRequest) {
       })
     }
 
+    const creditData = creditsArray[0] as any
     return NextResponse.json({
-      total: credits[0].total,
-      used: credits[0].used,
-      remaining: credits[0].remaining,
-      lastUpdated: credits[0].updated_at,
+      total: creditData.total,
+      used: creditData.used,
+      remaining: creditData.remaining,
+      lastUpdated: creditData.updated_at,
     })
   } catch (error) {
     console.error('Get credits error:', error)

@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
       SELECT id FROM users WHERE email = ${email}
     `
 
-    if (existingUser.length > 0) {
+    if (Array.isArray(existingUser) && existingUser.length > 0) {
       return NextResponse.json(
         { error: 'Email already registered' },
         { status: 400 }
@@ -46,7 +46,8 @@ export async function POST(req: NextRequest) {
       RETURNING id, email, name
     `
 
-    const userId = newUser[0].id
+    const userResult = Array.isArray(newUser) ? newUser[0] : newUser.rows[0]
+    const userId = (userResult as any).id
 
     // Create initial credit balance (100 free credits)
     await sql`
@@ -63,8 +64,8 @@ export async function POST(req: NextRequest) {
     // Create session
     const session = await getIronSession<SessionData>(await cookies(), sessionOptions)
     session.userId = userId
-    session.email = newUser[0].email
-    session.name = newUser[0].name
+    session.email = (userResult as any).email
+    session.name = (userResult as any).name
     session.isLoggedIn = true
     await session.save()
 
@@ -72,8 +73,8 @@ export async function POST(req: NextRequest) {
       success: true,
       user: {
         id: userId,
-        email: newUser[0].email,
-        name: newUser[0].name,
+        email: (userResult as any).email,
+        name: (userResult as any).name,
       },
     })
   } catch (error: any) {
