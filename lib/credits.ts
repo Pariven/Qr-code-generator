@@ -32,9 +32,9 @@ export const PRICING_TIERS: PricingTier[] = [
   { id: "tier-3", name: "Standard", price: 25, credits: 10000 },
   { id: "tier-4", name: "Professional", price: 40, credits: 20000 },
   { id: "tier-5", name: "Business", price: 80, credits: 50000, popular: true },
-  { id: "tier-6", name: "Enterprise", price: 600, credits: 100000 },
+  { id: "tier-6", name: "Enterprise", price: 100, credits: 100000 },
   { id: "tier-7", name: "Premium", price: 250, credits: 250000 },
-  { id: "tier-8", name: "Ultimate", price: 400, credits: 500000 },
+  { id: "tier-8", name: "Ultimate", price: 600, credits: 500000 },
   { id: "tier-9", name: "Platinum", price: 700, credits: 1000000 },
   { id: "tier-10", name: "Diamond", price: 1600, credits: 2000000 },
 ]
