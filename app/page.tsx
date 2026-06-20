@@ -195,11 +195,11 @@ export default function Home() {
               // Draw QR code
               ctx.drawImage(qrCanvas, 0, 0)
               
-              // Draw text aligned with the left edge of the QR code squares
+              // Draw text centered below the QR code
               ctx.fillStyle = settings.fgColor
               ctx.font = `bold ${fontSize}px Arial, sans-serif`
-              ctx.textAlign = "left"
-              ctx.fillText(data, pixelMargin, qrCanvas.height + fontSize - 2)
+              ctx.textAlign = "center"
+              ctx.fillText(data, finalCanvas.width / 2, qrCanvas.height + fontSize - 2)
               
               const mimeType = settings.outputFormat === "JPG" ? "image/jpeg" : "image/png"
               qrDataUrl = finalCanvas.toDataURL(mimeType, settings.outputFormat === "JPG" ? 0.92 : undefined)
@@ -264,7 +264,7 @@ export default function Home() {
                 // Modify SVG viewBox and height to accommodate text, and add text element
                 svgString = svgString.replace(/viewBox="([^"]+)"/, `viewBox="0 0 ${qrCanvas.width} ${finalHeight}"`)
                 svgString = svgString.replace(/height="([^"]+)"/, `height="${finalHeight}"`)
-                svgString = svgString.replace('</svg>', `<text x="${pixelMargin}" y="${qrCanvas.height + fontSize - 2}" font-family="Arial, sans-serif" font-weight="bold" font-size="${fontSize}" fill="${settings.fgColor}">${data}</text></svg>`)
+                svgString = svgString.replace('</svg>', `<text x="${qrCanvas.width / 2}" y="${qrCanvas.height + fontSize - 2}" font-family="Arial, sans-serif" font-weight="bold" font-size="${fontSize}" fill="${settings.fgColor}" text-anchor="middle">${data}</text></svg>`)
               }
               
               const bytes = new TextEncoder().encode(svgString)
