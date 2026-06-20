@@ -141,6 +141,42 @@ export default function Home() {
               },
             })
 
+            // Custom draw the finder patterns for rubber stamping (slightly smaller inner dot)
+            const ctxQr = qrCanvas.getContext("2d")
+            if (ctxQr) {
+              const modules = qrCanvas.width / scale
+              
+              const drawFinderPattern = (cx: number, cy: number) => {
+                // Erase the standard 7x7 area completely
+                if (settings.transparentBg) {
+                  ctxQr.clearRect(cx - 3.5 * scale, cy - 3.5 * scale, 7 * scale, 7 * scale)
+                } else {
+                  ctxQr.fillStyle = "#ffffff"
+                  ctxQr.fillRect(cx - 3.5 * scale, cy - 3.5 * scale, 7 * scale, 7 * scale)
+                }
+                
+                ctxQr.fillStyle = settings.fgColor
+                
+                // Draw standard outer box (1 module thick)
+                ctxQr.fillRect(cx - 3.5 * scale, cy - 3.5 * scale, 7 * scale, 1 * scale) // Top
+                ctxQr.fillRect(cx - 3.5 * scale, cy + 2.5 * scale, 7 * scale, 1 * scale) // Bottom
+                ctxQr.fillRect(cx - 3.5 * scale, cy - 2.5 * scale, 1 * scale, 5 * scale) // Left
+                ctxQr.fillRect(cx + 2.5 * scale, cy - 2.5 * scale, 1 * scale, 5 * scale) // Right
+                
+                // Draw inner dot (slightly smaller: 2.5x2.5 modules instead of 3x3 to allow for ink spread but keep scannability)
+                const dotSize = 2.5 * scale;
+                ctxQr.fillRect(cx - (dotSize / 2), cy - (dotSize / 2), dotSize, dotSize)
+              }
+
+              const c = (margin + 3.5) * scale
+              const tr = (modules - margin - 3.5) * scale
+              const bl = (modules - margin - 3.5) * scale
+              
+              drawFinderPattern(c, c) // Top Left
+              drawFinderPattern(tr, c) // Top Right
+              drawFinderPattern(c, bl) // Bottom Left
+            }
+
             if (settings.addDataString && settings.outputFormat !== "SVG") {
               // Add text to the image (PNG/JPG)
               const fontSizeMap: { [key: string]: number } = { Small: 12, Medium: 16, Large: 24 }
@@ -179,6 +215,45 @@ export default function Home() {
                   light: settings.transparentBg ? "#00000000" : "#ffffff",
                 },
               })
+
+              // Customize SVG finder patterns for rubber stamping (slightly smaller inner dot)
+              const modules = qrCanvas.width / scale
+              const c = (margin + 3.5) * scale
+              const tr = (modules - margin - 3.5) * scale
+              const bl = (modules - margin - 3.5) * scale
+              
+              const drawSVGFinder = (cx: number, cy: number) => {
+                const dotSize = 2.5 * scale;
+                return `
+                  <!-- Background -->
+                  ${!settings.transparentBg ? `<rect x="${cx - 3.5 * scale}" y="${cy - 3.5 * scale}" width="${7 * scale}" height="${7 * scale}" fill="#ffffff" />` : ''}
+                  <!-- Outer standard box -->
+                  <rect x="${cx - 3.5 * scale}" y="${cy - 3.5 * scale}" width="${7 * scale}" height="${1 * scale}" fill="${settings.fgColor}" />
+                  <rect x="${cx - 3.5 * scale}" y="${cy + 2.5 * scale}" width="${7 * scale}" height="${1 * scale}" fill="${settings.fgColor}" />
+                  <rect x="${cx - 3.5 * scale}" y="${cy - 2.5 * scale}" width="${1 * scale}" height="${5 * scale}" fill="${settings.fgColor}" />
+                  <rect x="${cx + 2.5 * scale}" y="${cy - 2.5 * scale}" width="${1 * scale}" height="${5 * scale}" fill="${settings.fgColor}" />
+                  <!-- Inner small dot -->
+                  <rect x="${cx - (dotSize / 2)}" y="${cy - (dotSize / 2)}" width="${dotSize}" height="${dotSize}" fill="${settings.fgColor}" />
+                `
+              }
+              
+              const extraRects = drawSVGFinder(c, c) + drawSVGFinder(tr, c) + drawSVGFinder(c, bl)
+              
+              // Use a mask to hide the original 3 finder patterns
+              const maskId = `hide-finders-${index}`
+              const maskDef = `
+                <defs>
+                  <mask id="${maskId}">
+                    <rect x="0" y="0" width="100%" height="100%" fill="white" />
+                    <rect x="${c - 3.5 * scale}" y="${c - 3.5 * scale}" width="${7 * scale}" height="${7 * scale}" fill="black" />
+                    <rect x="${tr - 3.5 * scale}" y="${c - 3.5 * scale}" width="${7 * scale}" height="${7 * scale}" fill="black" />
+                    <rect x="${c - 3.5 * scale}" y="${bl - 3.5 * scale}" width="${7 * scale}" height="${7 * scale}" fill="black" />
+                  </mask>
+                </defs>
+              `
+              
+              svgString = svgString.replace(/>\s*<path/i, `>${maskDef}<g mask="url(#${maskId})"><path`)
+              svgString = svgString.replace('</svg>', `</g>${extraRects}</svg>`)
 
               if (settings.addDataString) {
                 const fontSizeMap: { [key: string]: number } = { Small: 12, Medium: 16, Large: 24 }
