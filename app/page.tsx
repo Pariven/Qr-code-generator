@@ -141,24 +141,6 @@ export default function Home() {
               },
             })
 
-            // Enhance the 3 finder pattern dots to be more visible (4x4 modules instead of 3x3)
-            const ctxQr = qrCanvas.getContext("2d")
-            if (ctxQr) {
-              const modules = qrCanvas.width / scale
-              ctxQr.fillStyle = settings.fgColor
-              
-              const c = (margin + 3.5) * scale
-              const tr = (modules - margin - 3.5) * scale
-              const bl = (modules - margin - 3.5) * scale
-              
-              const dotSize = 4 * scale
-              const offset = dotSize / 2
-              
-              ctxQr.fillRect(c - offset, c - offset, dotSize, dotSize) // Top Left
-              ctxQr.fillRect(tr - offset, c - offset, dotSize, dotSize) // Top Right
-              ctxQr.fillRect(c - offset, bl - offset, dotSize, dotSize) // Bottom Left
-            }
-
             if (settings.addDataString && settings.outputFormat !== "SVG") {
               // Add text to the image (PNG/JPG)
               const fontSizeMap: { [key: string]: number } = { Small: 12, Medium: 16, Large: 24 }
@@ -198,21 +180,6 @@ export default function Home() {
                 },
               })
 
-              // Enhance SVG finder pattern dots
-              const modules = qrCanvas.width / scale
-              const c = (margin + 3.5) * scale
-              const tr = (modules - margin - 3.5) * scale
-              const bl = (modules - margin - 3.5) * scale
-              const dotSize = 4 * scale
-              const offset = dotSize / 2
-              
-              const extraRects = `
-                <rect x="${c - offset}" y="${c - offset}" width="${dotSize}" height="${dotSize}" fill="${settings.fgColor}" />
-                <rect x="${tr - offset}" y="${c - offset}" width="${dotSize}" height="${dotSize}" fill="${settings.fgColor}" />
-                <rect x="${c - offset}" y="${bl - offset}" width="${dotSize}" height="${dotSize}" fill="${settings.fgColor}" />
-              `
-              svgString = svgString.replace('</svg>', `${extraRects}</svg>`)
-              
               if (settings.addDataString) {
                 const fontSizeMap: { [key: string]: number } = { Small: 12, Medium: 16, Large: 24 }
                 const fontSize = fontSizeMap[settings.fontSize] || 16
