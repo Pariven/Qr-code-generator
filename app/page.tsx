@@ -179,13 +179,21 @@ export default function Home() {
 
             if (settings.addDataString && settings.outputFormat !== "SVG") {
               // Add text to the image (PNG/JPG)
-              const fontSizeMap: { [key: string]: number } = { Small: 12, Medium: 16, Large: 24 }
-              const fontSize = fontSizeMap[settings.fontSize] || 16
-              const textHeight = fontSize + 10
+              const modules = qrCanvas.width / scale - 2 * margin
+              const targetWidth = modules * scale
               
+              // Calculate dynamic font size to make text exactly as wide as the QR code
+              const tempCanvas = document.createElement("canvas")
+              const tempCtx = tempCanvas.getContext("2d")!
+              const testFontSize = 50
+              tempCtx.font = `bold ${testFontSize}px Arial, sans-serif`
+              const textWidth = tempCtx.measureText(data).width
+              const dynamicFontSize = testFontSize * (targetWidth / textWidth)
+              
+              const gap = 1.5 * scale
               const finalCanvas = document.createElement("canvas")
               finalCanvas.width = qrCanvas.width
-              finalCanvas.height = qrCanvas.height + textHeight
+              finalCanvas.height = (margin * scale) + (modules * scale) + gap + dynamicFontSize + (margin * scale)
               const ctx = finalCanvas.getContext("2d")!
               
               // Draw background
@@ -195,11 +203,14 @@ export default function Home() {
               // Draw QR code
               ctx.drawImage(qrCanvas, 0, 0)
               
-              // Draw text centered below the QR code
+              // Draw text perfectly aligned with the QR code's width
               ctx.fillStyle = settings.fgColor
-              ctx.font = `bold ${fontSize}px Arial, sans-serif`
+              ctx.font = `bold ${dynamicFontSize}px Arial, sans-serif`
               ctx.textAlign = "center"
-              ctx.fillText(data, finalCanvas.width / 2, qrCanvas.height + fontSize - 2)
+              ctx.textBaseline = "top"
+              
+              const textY = (margin + modules) * scale + gap
+              ctx.fillText(data, finalCanvas.width / 2, textY)
               
               const mimeType = settings.outputFormat === "JPG" ? "image/jpeg" : "image/png"
               qrDataUrl = finalCanvas.toDataURL(mimeType, settings.outputFormat === "JPG" ? 0.92 : undefined)
@@ -256,15 +267,22 @@ export default function Home() {
               svgString = svgString.replace('</svg>', `</g>${extraRects}</svg>`)
 
               if (settings.addDataString) {
-                const fontSizeMap: { [key: string]: number } = { Small: 12, Medium: 16, Large: 24 }
-                const fontSize = fontSizeMap[settings.fontSize] || 16
-                const textHeight = fontSize + 10
-                const finalHeight = qrCanvas.height + textHeight
+                const modules = qrCanvas.width / scale - 2 * margin
+                const targetWidth = modules * scale
+                
+                // Estimate dynamic font size (0.6 is a standard character width ratio for bold Arial)
+                const dynamicFontSize = targetWidth / (data.length * 0.6)
+                
+                const gap = 1.5 * scale
+                const finalHeight = (margin * scale) + (modules * scale) + gap + dynamicFontSize + (margin * scale)
                 
                 // Modify SVG viewBox and height to accommodate text, and add text element
                 svgString = svgString.replace(/viewBox="([^"]+)"/, `viewBox="0 0 ${qrCanvas.width} ${finalHeight}"`)
                 svgString = svgString.replace(/height="([^"]+)"/, `height="${finalHeight}"`)
-                svgString = svgString.replace('</svg>', `<text x="${qrCanvas.width / 2}" y="${qrCanvas.height + fontSize - 2}" font-family="Arial, sans-serif" font-weight="bold" font-size="${fontSize}" fill="${settings.fgColor}" text-anchor="middle">${data}</text></svg>`)
+                
+                // Use textLength to force exact width matching
+                const textY = (margin + modules) * scale + gap + (dynamicFontSize * 0.75) // 0.75 for baseline adjustment
+                svgString = svgString.replace('</svg>', `<text x="${qrCanvas.width / 2}" y="${textY}" font-family="Arial, sans-serif" font-weight="bold" font-size="${dynamicFontSize}" fill="${settings.fgColor}" text-anchor="middle" textLength="${targetWidth}" lengthAdjust="spacingAndGlyphs">${data}</text></svg>`)
               }
               
               const bytes = new TextEncoder().encode(svgString)
