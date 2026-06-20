@@ -228,21 +228,22 @@ export default function Home() {
               })
 
               // Customize SVG finder patterns for rubber stamping (slightly smaller inner dot)
-              const modules = qrCanvas.width / scale
-              const c = (margin + 3.5) * scale
-              const tr = (modules - margin - 3.5) * scale
-              const bl = (modules - margin - 3.5) * scale
+              // SVG coordinate system is in modules (1 unit = 1 module), so we DO NOT multiply by scale for SVG internal coordinates.
+              const svgModules = qrCanvas.width / scale // Total modules including margins
+              const c = margin + 3.5
+              const tr = svgModules - margin - 3.5
+              const bl = svgModules - margin - 3.5
               
               const drawSVGFinder = (cx: number, cy: number) => {
-                const dotSize = 2.5 * scale;
+                const dotSize = 2.5; // modules
                 return `
                   <!-- Background -->
-                  ${!settings.transparentBg ? `<rect x="${cx - 3.5 * scale}" y="${cy - 3.5 * scale}" width="${7 * scale}" height="${7 * scale}" fill="#ffffff" />` : ''}
+                  ${!settings.transparentBg ? `<rect x="${cx - 3.5}" y="${cy - 3.5}" width="${7}" height="${7}" fill="#ffffff" />` : ''}
                   <!-- Outer standard box -->
-                  <rect x="${cx - 3.5 * scale}" y="${cy - 3.5 * scale}" width="${7 * scale}" height="${1 * scale}" fill="${settings.fgColor}" />
-                  <rect x="${cx - 3.5 * scale}" y="${cy + 2.5 * scale}" width="${7 * scale}" height="${1 * scale}" fill="${settings.fgColor}" />
-                  <rect x="${cx - 3.5 * scale}" y="${cy - 2.5 * scale}" width="${1 * scale}" height="${5 * scale}" fill="${settings.fgColor}" />
-                  <rect x="${cx + 2.5 * scale}" y="${cy - 2.5 * scale}" width="${1 * scale}" height="${5 * scale}" fill="${settings.fgColor}" />
+                  <rect x="${cx - 3.5}" y="${cy - 3.5}" width="${7}" height="${1}" fill="${settings.fgColor}" />
+                  <rect x="${cx - 3.5}" y="${cy + 2.5}" width="${7}" height="${1}" fill="${settings.fgColor}" />
+                  <rect x="${cx - 3.5}" y="${cy - 2.5}" width="${1}" height="${5}" fill="${settings.fgColor}" />
+                  <rect x="${cx + 2.5}" y="${cy - 2.5}" width="${1}" height="${5}" fill="${settings.fgColor}" />
                   <!-- Inner small dot -->
                   <rect x="${cx - (dotSize / 2)}" y="${cy - (dotSize / 2)}" width="${dotSize}" height="${dotSize}" fill="${settings.fgColor}" />
                 `
@@ -256,9 +257,9 @@ export default function Home() {
                 <defs>
                   <mask id="${maskId}">
                     <rect x="0" y="0" width="100%" height="100%" fill="white" />
-                    <rect x="${c - 3.5 * scale}" y="${c - 3.5 * scale}" width="${7 * scale}" height="${7 * scale}" fill="black" />
-                    <rect x="${tr - 3.5 * scale}" y="${c - 3.5 * scale}" width="${7 * scale}" height="${7 * scale}" fill="black" />
-                    <rect x="${c - 3.5 * scale}" y="${bl - 3.5 * scale}" width="${7 * scale}" height="${7 * scale}" fill="black" />
+                    <rect x="${c - 3.5}" y="${c - 3.5}" width="${7}" height="${7}" fill="black" />
+                    <rect x="${tr - 3.5}" y="${c - 3.5}" width="${7}" height="${7}" fill="black" />
+                    <rect x="${c - 3.5}" y="${bl - 3.5}" width="${7}" height="${7}" fill="black" />
                   </mask>
                 </defs>
               `
@@ -267,22 +268,25 @@ export default function Home() {
               svgString = svgString.replace('</svg>', `</g>${extraRects}</svg>`)
 
               if (settings.addDataString) {
-                const modules = qrCanvas.width / scale - 2 * margin
-                const targetWidth = modules * scale
+                const innerModules = svgModules - 2 * margin
+                const targetWidthModules = innerModules
                 
-                // Estimate dynamic font size (0.6 is a standard character width ratio for bold Arial)
-                const dynamicFontSize = targetWidth / (data.length * 0.6)
+                // Estimate dynamic font size in module units
+                const dynamicFontSizeModules = targetWidthModules / (data.length * 0.6)
                 
-                const gap = 1.5 * scale
-                const finalHeight = (margin * scale) + (modules * scale) + gap + dynamicFontSize + (margin * scale)
+                const gapModules = 1.5
+                const finalHeightModules = svgModules + gapModules + dynamicFontSizeModules
                 
                 // Modify SVG viewBox and height to accommodate text, and add text element
-                svgString = svgString.replace(/viewBox="([^"]+)"/, `viewBox="0 0 ${qrCanvas.width} ${finalHeight}"`)
-                svgString = svgString.replace(/height="([^"]+)"/, `height="${finalHeight}"`)
+                svgString = svgString.replace(/viewBox="0 0 ([0-9.]+) ([0-9.]+)"/, `viewBox="0 0 $1 ${finalHeightModules}"`)
+                const finalHeightPixels = finalHeightModules * scale
+                svgString = svgString.replace(/height="([^"]+)"/, `height="${finalHeightPixels}"`)
                 
-                // Use textLength to force exact width matching
-                const textY = (margin + modules) * scale + gap + (dynamicFontSize * 0.75) // 0.75 for baseline adjustment
-                svgString = svgString.replace('</svg>', `<text x="${qrCanvas.width / 2}" y="${textY}" font-family="Arial, sans-serif" font-weight="bold" font-size="${dynamicFontSize}" fill="${settings.fgColor}" text-anchor="middle" textLength="${targetWidth}" lengthAdjust="spacingAndGlyphs">${data}</text></svg>`)
+                // Use textLength to force exact width matching in module units
+                const textYModules = margin + innerModules + gapModules + (dynamicFontSizeModules * 0.75) // 0.75 for baseline adjustment
+                const centerXModules = svgModules / 2
+                
+                svgString = svgString.replace('</svg>', `<text x="${centerXModules}" y="${textYModules}" font-family="Arial, sans-serif" font-weight="bold" font-size="${dynamicFontSizeModules}" fill="${settings.fgColor}" text-anchor="middle" textLength="${targetWidthModules}" lengthAdjust="spacingAndGlyphs">${data}</text></svg>`)
               }
               
               const bytes = new TextEncoder().encode(svgString)
