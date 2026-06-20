@@ -33,7 +33,7 @@ export default function Home() {
   const [settings, setSettings] = useState({
     errorCorrection: "Medium",
     pixelsPerBlock: 10,
-    borderBlocks: 2,
+    borderBlocks: 4,
     separator: "\n",
     addDataString: false,
     treatAsCSV: false,
