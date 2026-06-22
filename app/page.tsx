@@ -31,9 +31,9 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<"generator" | "pricing">("generator")
   const [refreshBalance, setRefreshBalance] = useState(0)
   const [settings, setSettings] = useState({
-    errorCorrection: "Medium",
+    errorCorrection: "High",
     pixelsPerBlock: 10,
-    borderBlocks: 4,
+    borderBlocks: 1,
     separator: "\n",
     addDataString: false,
     treatAsCSV: false,
