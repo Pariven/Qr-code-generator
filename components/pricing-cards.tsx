@@ -27,8 +27,8 @@ export default function PricingCards({ onPurchaseComplete }: PricingCardsProps) 
       // Check if user is logged in first
       const sessionCheck = await fetch('/api/auth/session')
       const sessionData = await sessionCheck.json()
-      
-      if (!sessionData.isLoggedIn) {
+
+      if (!sessionData?.user) {
         toast({
           title: "Login Required",
           description: "Please log in to purchase credits.",
